@@ -55,17 +55,24 @@ public:
     };
     int getShotPower() {return shotPower;};
 
+    int getPosX() {return posX;};
+    int getPosY() {return posY;};
 
-    void drawSprite();
+    ModeloMatricial getSprite(){return Sprite;};
+
+
+    void drawSprite(float posX, float posY, RGB Palette[100]);
     Poligono getHitbox(){ return Hitbox; };
 
     void updateHitbox();
+    void movePlayer(int XMAX, int refreshRate);
+    void rotateEntity();
 
 
 };
 Player::Player(float startPosX, float startPosY)
 {
-    Sprite.leModelo("./sprites/player");
+    Sprite.leModelo("./sprites/player.txt");
     speed = 0;
     direction = 0;
     shotAngle = 0;
@@ -77,13 +84,53 @@ Player::Player(float startPosX, float startPosY)
 void Player::updateHitbox()
 {
     Hitbox = Poligono();
-    Hitbox.insereVertice(Ponto(posX,posY));
-    Hitbox.insereVertice(Ponto(posX+Sprite.width,posY));
-    Hitbox.insereVertice(Ponto(posX+Sprite.width,posY-Sprite.height));
-    Hitbox.insereVertice(Ponto(posX,posY-Sprite.height));
+    Hitbox.insereVertice(Ponto(posX+1,posY+1));
+    Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY+1));
+    Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY-Sprite.height+1));
+    Hitbox.insereVertice(Ponto(posX+1,posY-Sprite.height+1));
+    Hitbox.desenhaPoligono();
     Hitbox.imprime();
+    cout << endl;
 }
+void Player::drawSprite(float posX, float posY, RGB Palette[100])
+{
+     float offsetX = 0, offsetY = 0;
+     int height = Sprite.height;
+     int width = Sprite.width;
+        for(int i = 0; i < height;i++)
+        {
+            for(int j = 0; j < width; j++)
+            {
+                glColor3f(Palette[Sprite.M[i][j]].r/255.0, Palette[Sprite.M[i][j]].g/255.0, Palette[Sprite.M[i][j]].b/255.0); // R, G, B  [0..1]
+                glRectf(posX-offsetX,posY+offsetY,posX-offsetX+1,posY+offsetY+1);
+                offsetX+=1;
+            }
+             offsetY-=1;
+             offsetX=0;
+        }
 
+}
+void Player::movePlayer(int XMAX, int refreshRate)
+{
+
+    posX = posX + direction*0.45*XMAX/200;
+    glTranslatef(posX,0,0);
+    direction = 0;
+}
+void Player::rotateEntity()
+{
+    if(shotAngle > 80)
+        shotAngle = 80;
+    else if(shotAngle < -80)
+        shotAngle = -80;
+
+
+    Ponto P = Ponto(posX - Sprite.width/2,posY - Sprite.height/2);
+
+    glTranslatef(P.x, P.y, P.z);
+    glRotatef(shotAngle, 0,0,1);
+    glTranslatef(-P.x, -P.y, -P.z);
+}
 
 
 

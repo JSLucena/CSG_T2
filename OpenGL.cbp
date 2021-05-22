@@ -61,6 +61,7 @@
 			<Add option="-Wno-narrowing" />
 			<Add option="-Wno-deprecated-declarations" />
 		</Compiler>
+		<Unit filename="Bullet.h" />
 		<Unit filename="Poligono.cpp" />
 		<Unit filename="Poligono.h" />
 		<Unit filename="Ponto.cpp" />

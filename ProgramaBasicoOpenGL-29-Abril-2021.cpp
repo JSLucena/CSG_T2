@@ -17,6 +17,7 @@
 #include <cmath>
 #include <ctime>
 #include <fstream>
+#include <vector>
 
 
 using namespace std;
@@ -45,6 +46,12 @@ using namespace std;
 ////////////////////////
 #include "RGB.h"
 #include "player.h"
+#include "Bullet.h"
+
+
+#define REFRESHRATE 60
+#define XMAX 100
+#define YMAX 100
 ////////////////////////
 Temporizador T;
 double AccumDeltaT=0;
@@ -62,9 +69,15 @@ bool desenha = false;
 float angulo=0.0;
 
 
+void RotacionaAoRedorDeUmPonto(float alfa, Ponto P);
+
 ///////////////////////////////////////////////////////////////////
 RGB PaletteGlobal[100];
 ModeloMatricial teste;
+Player player = Player(-XMAX*0.4,-YMAX* 0.75);
+//Player player = Player(0,0);
+vector<Bullet> bullets;
+bool shoot = false;
 
 ///////////////////////////////////////////////////////////////////
 //###############################################################//
@@ -95,18 +108,63 @@ void leCores()
 
 }
 //###############################################################//
-void moveTest()
-{
-    pos = pos + side;
-    glTranslatef(pos,0,0);
-}
+
 void printString(string s, int posX, int posY)
 {
+    glColor3f(1,1,1);
     glRasterPos2f(posX, posY); //define position on the screen
     for (int i = 0; i < s.length(); i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, s[i]);
   }
 }
+void spawnBullet()
+{
+    Bullet tempBullet = Bullet((player.getPosX() - player.getSprite().width/2 + 1), player.getPosY(),player.getShotPower(),player.getShotAngle());
+    bullets.push_back(tempBullet);
+}
+
+
+void playerHandler()
+{
+    glPushMatrix();
+        player.movePlayer(XMAX,REFRESHRATE);
+        player.rotateEntity();
+        player.drawSprite(player.getPosX(),player.getPosY(),PaletteGlobal);
+        glColor3f(1,1,1);
+        player.updateHitbox();
+
+
+        /// Angulo e forca do disparo
+        glPushMatrix();
+        glColor3f(1,0,0);
+        glLineWidth(1);
+        glBegin(GL_LINES);
+            glVertex3f((player.getPosX() - player.getSprite().width/2 + 1), player.getPosY(),0);
+            glVertex3f(player.getPosX() - player.getSprite().width/2 + 1, player.getPosY() + player.getShotPower(),0);
+        glEnd();
+        RotacionaAoRedorDeUmPonto(player.getShotAngle(),Ponto(player.getPosX() - player.getSprite().width/2,player.getPosY()));
+       glPopMatrix();
+
+    glPopMatrix();
+
+    if(shoot == true)
+    {
+        spawnBullet();
+        bullets.back().setIsAlly(true);
+    }
+
+
+    shoot = false;
+}
+void bulletHandler()
+{
+    for(auto &b : bullets)
+    {
+        b.moveBullet();
+        b.drawShape();
+    }
+}
+//################################################################
 // **********************************************************************
 //    Calcula o produto escalar entre os vetores V1 e V2
 // **********************************************************************
@@ -172,19 +230,21 @@ void init()
     Ponto MinPoly, MaxPoly, Folga;
 
     // Define a cor do fundo da tela (AZUL)
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 1.0f, 0.5f);
 
 
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///
     leCores();
     teste.leModelo("./sprites/house3.txt");
+   // player = Player(-50,-50);
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///
 
     P1.LePoligono("Triangulo.txt");
     P2.LePoligono("Retangulo.txt");
 
-    Min = Ponto (-100, -100);
-    Max = Ponto (100, 100);
+
+    Min = Ponto (-XMAX, -YMAX);
+    Max = Ponto (XMAX, YMAX);
 
     /*
     P1.obtemLimites(MinPoly, MaxPoly);
@@ -221,10 +281,9 @@ void animate()
     TempoTotal += dt;
     nFrames++;
 
-    if (AccumDeltaT > 1.0/60) // fixa a atualiza‹o da tela em 60
+    if (AccumDeltaT > 1.0/REFRESHRATE) // fixa a atualiza‹o da tela em 60
     {
         AccumDeltaT = 0;
-      //  angulo+=2;
         glutPostRedisplay();
     }
     if (TempoTotal > 5.0)
@@ -345,7 +404,7 @@ void DesenhaSirene()
 // **********************************************************************
 void display( void )
 {
-    string speedDebug;
+    string angleUI;
 	// Limpa a tela com a cor de fundo
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -358,47 +417,35 @@ void display( void )
 
 
 	////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//////
-	speedDebug = "Speed: " + to_string(speed);
-    printString(speedDebug,-50,50);
+	glPushMatrix();
+        angleUI = "Angle: " + to_string(player.getShotAngle());
+        printString(angleUI,-XMAX/2-XMAX/2,YMAX*0.75);
+        printString("Force: " + to_string(player.getShotPower()),-XMAX/2-XMAX/2,YMAX*0.80 );
+
+    glPopMatrix();
+    /*
     glPushMatrix();
     {
         teste.desenhaModelo(-50, -50, PaletteGlobal);
     }
     glPopMatrix();
+    */
     ////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//////
-	glLineWidth(3);
-	glColor3f(1,1,1); // R, G, B  [0..1]
-    glRotatef(angulo, 0,0,1); // rotiona no eixo Z
-  //  DesenhaEixos();
+    playerHandler();
 
+    bulletHandler();
+
+
+  /*
     glPushMatrix();
         glTranslatef(0, 0, 0);
         glRotatef(angulo, 0,0,1);
         moveTest();
         DesenhaSirene();
     glPopMatrix();
-/*
-    glPushMatrix();
-        glTranslatef(-10, 10, 0);
-        glRotatef(angulo, 0,0,1);
-        DesenhaSirene();
-    glPopMatrix();
-
-    glPushMatrix();
-        glTranslatef(10, -10, 0);
-        glRotatef(angulo, 0,0,1);
-        DesenhaSirene();
-    glPopMatrix();
-
-    glPushMatrix();
-        glTranslatef(-10, -10, 0);
-        glRotatef(angulo, 0,0,1);
-        DesenhaSirene();
-    glPopMatrix();
     */
 
 
-    side = 0;
 	glutSwapBuffers();
 }
 // **********************************************************************
@@ -441,19 +488,19 @@ void keyboard ( unsigned char key, int x, int y )
             ContaTempo(3);
             break;
         case 'w':
-            speed++;
+            player.setShotPower(player.getShotPower()+1);
             break;
         case 's':
-            speed--;
+            player.setShotPower(player.getShotPower()-1);;
             break;
         case 'a':
-            side = -1;
+            player.setDirection(-1);
             break;
         case 'd':
-            side = 1;
+            player.setDirection(1);
             break;
         case ' ':
-            desenha = !desenha;
+            shoot = true;
         break;
 		default:
 			break;
@@ -472,10 +519,10 @@ void arrow_keys ( int a_keys, int x, int y )
 			glutFullScreen ( ); // Vai para Full Screen
 			break;
         case GLUT_KEY_RIGHT:       // Se pressionar SETA DIR
-            angulo-= 1*speed;
+            player.setShotAngle(player.getShotAngle()-1);
             break;
         case GLUT_KEY_LEFT:       // Se pressionar SETA ESQ
-            angulo+= 1*speed;
+            player.setShotAngle(player.getShotAngle()+1);
             break;
 	    case GLUT_KEY_DOWN:     // Se pressionar UP
 								// Reposiciona a janela

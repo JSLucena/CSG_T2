@@ -127,11 +127,12 @@
 	<windows.h>
 	<sys/time.h>
 
-1621109356 source:f:\trabalhos\20211\cg\csg_t2\programabasicoopengl-29-abril-2021.cpp
+1621717418 source:f:\trabalhos\20211\cg\csg_t2\programabasicoopengl-29-abril-2021.cpp
 	<iostream>
 	<cmath>
 	<ctime>
 	<fstream>
+	<vector>
 	<windows.h>
 	<glut.h>
 	<sys/time.h>
@@ -142,8 +143,9 @@
 	"Temporizador.h"
 	"RGB.h"
 	"player.h"
+	"Bullet.h"
 
-1621108893 f:\trabalhos\20211\cg\csg_t2\rgb.h
+1621704897 f:\trabalhos\20211\cg\csg_t2\rgb.h
 	<iostream>
 	<iomanip>
 	<windows.h>
@@ -153,7 +155,7 @@
 	"Ponto.h"
 	<vector>
 
-1621107083 f:\trabalhos\20211\cg\csg_t2\player.h
+1621715661 f:\trabalhos\20211\cg\csg_t2\player.h
 	<iostream>
 	<windows.h>
 	<glut.h>
@@ -161,5 +163,15 @@
 	<glut.h>
 	"Poligono.h"
 	"RGB.h"
+	<vector>
+
+1621717767 f:\trabalhos\20211\cg\csg_t2\bullet.h
+	<iostream>
+	<iomanip>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Poligono.h"
 	<vector>
 

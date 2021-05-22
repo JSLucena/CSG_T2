@@ -79,15 +79,6 @@ void ModeloMatricial::leModelo(const char *nome)
         }
 
     }
-    for (int i=0; i< linhas; i++)
-    {
-        for(int j = 0; j < colunas; j++)
-        {
-            cout << M[i][j] << " ";
-        }
-        cout << endl;
-
-    }
 
 
     cout << "Modelo lido com sucesso!" << endl;
