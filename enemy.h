@@ -65,7 +65,7 @@ public:
     ModeloMatricial getSprite(){return Sprite;};
 
 
-    void drawSprite(float posX, float posY, RGB Palette[100]);
+    void drawSprite(RGB Palette[100]);
     Poligono getHitbox(){ return Hitbox; };
 
     void updateHitbox();
@@ -102,11 +102,12 @@ void Enemy::updateHitbox()
     Hitbox.imprime();
     cout << endl;
 }
-void Enemy::drawSprite(float posX, float posY, RGB Palette[100])
+void Enemy::drawSprite(RGB Palette[100])
 {
      float offsetX = 0, offsetY = 0;
      int height = Sprite.height;
      int width = Sprite.width;
+     /*
         for(int i = 0; i < height;i++)
         {
             for(int j = 0; j < width; j++)
@@ -118,6 +119,8 @@ void Enemy::drawSprite(float posX, float posY, RGB Palette[100])
              offsetY-=1;
              offsetX=0;
         }
+        */
+    Sprite.desenhaModelo(posX,posY,Palette);
 
 }
 void Enemy::moveEnemy(int XMAX, int refreshRate)

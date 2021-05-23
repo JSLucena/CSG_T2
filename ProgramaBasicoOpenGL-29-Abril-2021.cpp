@@ -143,7 +143,7 @@ void playerHandler()
     glPushMatrix();
         player.movePlayer(XMAX,REFRESHRATE);
         player.rotateEntity();
-        player.drawSprite(player.getPosX(),player.getPosY(),PaletteGlobal);
+        player.drawSprite(PaletteGlobal);
         glColor3f(1,1,1);
         player.updateHitbox();
 
@@ -196,7 +196,7 @@ void enemyHandler()
 {
     glPushMatrix();
         testEnemy.moveEnemy(XMAX,REFRESHRATE);
-        player.drawSprite(testEnemy.getPosX(),testEnemy.getPosY(),PaletteGlobal);
+        testEnemy.drawSprite(PaletteGlobal);
         glColor3f(1,1,1);
         testEnemy.updateHitbox();
     glPopMatrix();

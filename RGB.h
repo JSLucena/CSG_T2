@@ -93,11 +93,11 @@ void ModeloMatricial::desenhaModelo(float posX, float posY, RGB Palette[100])
         for(int j = 0; j < width; j++)
         {
             glColor3f(Palette[M[i][j]].r/255.0, Palette[M[i][j]].g/255.0, Palette[M[i][j]].b/255.0); // R, G, B  [0..1]
-            glRectf(posY-offsetY,posX+offsetX,posY-offsetY+1,posX+offsetX+1);
-            offsetY++;
+            glRectf(posX-offsetX,posY+offsetY,posX-offsetX+1,posY+offsetY+1);
+            offsetX++;
         }
-         offsetX--;
-         offsetY=0;
+         offsetX=0;
+         offsetY--;
     }
 }
 
