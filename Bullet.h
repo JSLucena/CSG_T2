@@ -42,6 +42,8 @@ public:
         isAlly = b;
     }
     bool getIsAlly(){return isAlly;};
+    float getPosX(){return posX;};
+    float getPosY(){return posY;};
     void drawShape();
     void moveBullet();
 
@@ -54,6 +56,8 @@ Bullet::Bullet(float startX, float startY, float force, float angle)
     shape = Poligono();
     posX = startX;
     posY = startY;
+
+
 
     shape.insereVertice(Ponto(posX,posY));
     shape.insereVertice(Ponto(posX+2,posY+2));
@@ -74,12 +78,15 @@ Bullet::Bullet(float startX, float startY, float force, float angle)
 
 void Bullet::drawShape()
 {
-    shape.desenhaPoligono();
+
+    glPushMatrix();
+        glLineWidth(2);
+        glColor3f(1,1,0); // R, G, B  [0..1]
+        shape.desenhaPoligono();
+    glPopMatrix();
 
 
 
-
-   // glTranslatef(posX, posY, 0);
    // glRotatef(angle, 0,0,1);
    // glTranslatef(-posX, -posY, 0);
 
@@ -88,6 +95,11 @@ void Bullet::moveBullet()
 {
     posX = posX + speedX;
     posY = posY + speedY;
-    glTranslatef(posX,posY,0);
+     cout << "(" << posX << "," << posY << ")" << endl;
+    shape = Poligono();
+    shape.insereVertice(Ponto(posX,posY));
+    shape.insereVertice(Ponto(posX+2,posY+2));
+    shape.insereVertice(Ponto(posX+4,posY));
+
 }
 #endif

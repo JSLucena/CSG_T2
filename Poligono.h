@@ -47,4 +47,4 @@ public:
     void LePoligono(const char *nome);
 };
 
-#endif 
+#endif

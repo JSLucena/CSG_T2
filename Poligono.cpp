@@ -13,7 +13,7 @@ using namespace std;
 
 Poligono::Poligono()
 {
-    
+
 }
 
 void Poligono::insereVertice(Ponto p)
@@ -62,7 +62,7 @@ unsigned long Poligono::getNVertices()
 void Poligono::obtemLimites(Ponto &Min, Ponto &Max)
 {
     Max = Min = Vertices[0];
-    
+
     for (int i=0; i<Vertices.size(); i++)
     {
         Min = ObtemMinimo (Vertices[i], Min);
@@ -86,7 +86,7 @@ void Poligono::LePoligono(const char *nome)
     string S;
     //int nLinha = 0;
     unsigned int qtdVertices;
-    
+
     input >> qtdVertices;  // arq << qtdVertices
 
     for (int i=0; i< qtdVertices; i++)

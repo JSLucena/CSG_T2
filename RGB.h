@@ -79,6 +79,7 @@ void ModeloMatricial::leModelo(const char *nome)
         }
 
     }
+    input.close();
 
 
     cout << "Modelo lido com sucesso!" << endl;

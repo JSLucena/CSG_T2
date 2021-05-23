@@ -47,6 +47,7 @@ using namespace std;
 #include "RGB.h"
 #include "player.h"
 #include "Bullet.h"
+#include "enemy.h"
 
 
 #define REFRESHRATE 60
@@ -78,6 +79,9 @@ Player player = Player(-XMAX*0.4,-YMAX* 0.75);
 //Player player = Player(0,0);
 vector<Bullet> bullets;
 bool shoot = false;
+
+
+Enemy testEnemy;
 
 ///////////////////////////////////////////////////////////////////
 //###############################################################//
@@ -123,7 +127,17 @@ void spawnBullet()
     bullets.push_back(tempBullet);
 }
 
+bool BulletOutOfBounds(Bullet b)
+{
+    if(abs(b.getPosX()) > XMAX || abs(b.getPosY()) > YMAX)
+        return true;
+    return false;
+}
 
+void respawnEnemy(Enemy &e)
+{
+    e = Enemy(XMAX/2,25,e.getType());
+}
 void playerHandler()
 {
     glPushMatrix();
@@ -149,8 +163,12 @@ void playerHandler()
 
     if(shoot == true)
     {
-        spawnBullet();
-        bullets.back().setIsAlly(true);
+        if(player.getShotPower() > 0 )
+        {
+            spawnBullet();
+            bullets.back().setIsAlly(true);
+        }
+
     }
 
 
@@ -158,11 +176,34 @@ void playerHandler()
 }
 void bulletHandler()
 {
-    for(auto &b : bullets)
-    {
-        b.moveBullet();
-        b.drawShape();
-    }
+    cout << bullets.size() << " ";
+    if(bullets.size() > 0 )
+        for(auto b = bullets.begin(); b != bullets.end(); b++)
+        {
+
+            b->drawShape();
+            b->moveBullet();
+          //  cout << b.getPosX() << "/" << b.getPosY() << endl;
+            if(BulletOutOfBounds(*b))
+            {
+                bullets.erase(b);
+                break;
+            }
+
+        }
+}
+void enemyHandler()
+{
+    glPushMatrix();
+        testEnemy.moveEnemy(XMAX,REFRESHRATE);
+        player.drawSprite(testEnemy.getPosX(),testEnemy.getPosY(),PaletteGlobal);
+        glColor3f(1,1,1);
+        testEnemy.updateHitbox();
+    glPopMatrix();
+    if(abs(testEnemy.getPosX()) > XMAX/2 )
+            respawnEnemy(testEnemy);
+
+
 }
 //################################################################
 // **********************************************************************
@@ -235,8 +276,6 @@ void init()
 
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///
     leCores();
-    teste.leModelo("./sprites/house3.txt");
-   // player = Player(-50,-50);
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///
 
     P1.LePoligono("Triangulo.txt");
@@ -245,6 +284,9 @@ void init()
 
     Min = Ponto (-XMAX, -YMAX);
     Max = Ponto (XMAX, YMAX);
+
+    testEnemy = Enemy(XMAX/2,50, 1);
+
 
     /*
     P1.obtemLimites(MinPoly, MaxPoly);
@@ -424,27 +466,11 @@ void display( void )
 
     glPopMatrix();
     /*
-    glPushMatrix();
-    {
-        teste.desenhaModelo(-50, -50, PaletteGlobal);
-    }
-    glPopMatrix();
     */
     ////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//////
     playerHandler();
-
     bulletHandler();
-
-
-  /*
-    glPushMatrix();
-        glTranslatef(0, 0, 0);
-        glRotatef(angulo, 0,0,1);
-        moveTest();
-        DesenhaSirene();
-    glPopMatrix();
-    */
-
+    enemyHandler();
 
 	glutSwapBuffers();
 }
@@ -548,7 +574,7 @@ int  main ( int argc, char** argv )
     glutInitWindowPosition (0,0);
 
     // Define o tamanho inicial da janela grafica do programa
-    glutInitWindowSize  ( 1280, 720);  // Define o SRD
+    glutInitWindowSize  ( 1280, 1280);  // Define o SRD
 
     // Cria a janela na tela, definindo o nome da
     // que aparecera na barra de titulo da janela.

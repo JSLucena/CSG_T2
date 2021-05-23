@@ -1,5 +1,6 @@
-#ifndef player_hpp
-#define player_hpp
+
+#ifndef enemy_hpp
+#define enemy_hpp
 
 #include <iostream>
 using namespace std;
@@ -22,7 +23,7 @@ using namespace std;
 #include "RGB.h"
 #include <vector>
 
-class Player
+class Enemy
 {
 
     float speed;
@@ -32,8 +33,10 @@ class Player
     ModeloMatricial Sprite;
     Poligono Hitbox;
     float posX,posY;
+    int type;
 public:
-    Player(float startPosX, float startPosY);
+    Enemy(float startPosX, float startPosY, int type);
+    Enemy();
 
     void setspeed(float f){
         speed = f;
@@ -57,6 +60,7 @@ public:
 
     int getPosX() {return posX;};
     int getPosY() {return posY;};
+    int getType() {return type;};
 
     ModeloMatricial getSprite(){return Sprite;};
 
@@ -65,23 +69,29 @@ public:
     Poligono getHitbox(){ return Hitbox; };
 
     void updateHitbox();
-    void movePlayer(int XMAX, int refreshRate);
+    void moveEnemy(int XMAX, int refreshRate);
     void rotateEntity();
 
 
 };
-Player::Player(float startPosX, float startPosY)
+Enemy::Enemy()
 {
-    Sprite.leModelo("./sprites/player.txt");
     speed = 0;
-    direction = 0;
+}
+Enemy::Enemy(float startPosX, float startPosY, int type)
+{
+    string fname = "./sprites/enemy" + to_string(type) + ".txt";
+    const char *filename = fname.c_str();
+    Sprite.leModelo(filename);
+    speed = 0;
     shotAngle = 0;
     shotPower = 0;
     posX = startPosX;
     posY = startPosY;
+    this->type = type;
 
 }
-void Player::updateHitbox()
+void Enemy::updateHitbox()
 {
     Hitbox = Poligono();
     Hitbox.insereVertice(Ponto(posX+1,posY+1));
@@ -89,10 +99,10 @@ void Player::updateHitbox()
     Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY-Sprite.height+1));
     Hitbox.insereVertice(Ponto(posX+1,posY-Sprite.height+1));
     Hitbox.desenhaPoligono();
-   // Hitbox.imprime();
-   // cout << endl;
+    Hitbox.imprime();
+    cout << endl;
 }
-void Player::drawSprite(float posX, float posY, RGB Palette[100])
+void Enemy::drawSprite(float posX, float posY, RGB Palette[100])
 {
      float offsetX = 0, offsetY = 0;
      int height = Sprite.height;
@@ -110,14 +120,14 @@ void Player::drawSprite(float posX, float posY, RGB Palette[100])
         }
 
 }
-void Player::movePlayer(int XMAX, int refreshRate)
+void Enemy::moveEnemy(int XMAX, int refreshRate)
 {
 
-    posX = posX + direction*0.45*XMAX/200;
+    posX = posX - 1*0.45*XMAX/200;
     glTranslatef(posX,0,0);
     direction = 0;
 }
-void Player::rotateEntity()
+void Enemy::rotateEntity()
 {
     if(shotAngle > 80)
         shotAngle = 80;
