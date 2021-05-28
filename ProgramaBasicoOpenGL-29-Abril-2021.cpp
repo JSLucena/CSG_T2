@@ -61,9 +61,12 @@ double AccumDeltaT=0;
 Ponto Min, Max;
 Poligono P1, P2;
 
+
+double dt;
 float side = 0;
 float pos = 0;
-int speed = 0;
+float speed = 0.0;
+float timeToTravel = 15.0;
 
 bool desenha = false;
 
@@ -141,7 +144,8 @@ void respawnEnemy(Enemy &e)
 void playerHandler()
 {
     glPushMatrix();
-        player.movePlayer(XMAX,REFRESHRATE);
+        //player.movePlayer(XMAX,REFRESHRATE);
+        player.movePlayer(speed * dt);
         player.rotateEntity();
         player.drawSprite(PaletteGlobal);
         glColor3f(1,1,1);
@@ -149,7 +153,7 @@ void playerHandler()
 
 
         /// Angulo e forca do disparo
-        glPushMatrix();
+
         glColor3f(1,0,0);
         glLineWidth(1);
         glBegin(GL_LINES);
@@ -157,7 +161,7 @@ void playerHandler()
             glVertex3f(player.getPosX() - player.getSprite().width/2 + 1, player.getPosY() + player.getShotPower(),0);
         glEnd();
         RotacionaAoRedorDeUmPonto(player.getShotAngle(),Ponto(player.getPosX() - player.getSprite().width/2,player.getPosY()));
-       glPopMatrix();
+
 
     glPopMatrix();
 
@@ -195,7 +199,7 @@ void bulletHandler()
 void enemyHandler()
 {
     glPushMatrix();
-        testEnemy.moveEnemy(XMAX,REFRESHRATE);
+        testEnemy.moveEnemy(speed*dt);
         testEnemy.drawSprite(PaletteGlobal);
         glColor3f(1,1,1);
         testEnemy.updateHitbox();
@@ -288,6 +292,9 @@ void init()
     testEnemy = Enemy(XMAX/2,50, 1);
 
 
+    speed = XMAX*2/timeToTravel;
+
+
     /*
     P1.obtemLimites(MinPoly, MaxPoly);
 
@@ -317,7 +324,7 @@ double TempoTotal=0;
 // **********************************************************************
 void animate()
 {
-    double dt;
+
     dt = T.getDeltaT();
     AccumDeltaT += dt;
     TempoTotal += dt;
@@ -385,62 +392,7 @@ void RotacionaAoRedorDeUmPonto(float alfa, Ponto P)
     glRotatef(alfa, 0,0,1);
     glTranslatef(-P.x, -P.y, -P.z);
 }
-void DesenhaPa()
-{
-    glPushMatrix();
-    {
-        // RotacionaAoRedorDeUmPonto(angulo, Ponto(5, 5, 0));
-        glLineWidth(1);
-        glColor3f(1,1,0); // R, G, B  [0..1]
 
-        P1.desenhaPoligono();
-
-        glPointSize(5);
-        glColor3f(0,1,0); // R, G, B  [0..1]
-        P1.desenhaVertices();
-        glPointSize(1);
-
-    }
-    glPopMatrix();
-}
-void DesenhaRotor()
-{
-    glPushMatrix();
-        glColor3f(1,0,0); // R, G, B  [0..1]
-        Ponto Metade;
-        Ponto Min, Max;
-        P2.obtemLimites(Min,Max);
-        Metade.x = (Max.x-Min.x)/2;
-        Metade.y = (Max.y-Min.y)/2;
-        Metade.z = (Max.z-Min.z)/2;
-        glTranslatef(-Metade.x, -Metade.y, -Metade.z);
-        P2.desenhaPoligono();
-    glPopMatrix();
-}
-void DesenhaTodasAsPas()
-{
-    glPushMatrix();
-        DesenhaPa();
-        glRotatef(90,0,0,1);
-        DesenhaPa();
-        glRotatef(90,0,0,1);
-        DesenhaPa();
-        glRotatef(90,0,0,1);
-        DesenhaPa();
-    glPopMatrix();
-}
-void DesenhaCatavento()
-{
-    DesenhaTodasAsPas();
-    DesenhaRotor();
-}
-void DesenhaSirene()
-{
-    glPushMatrix();
-        glScalef(0.5,0.5,1);
-        DesenhaCatavento();
-    glPopMatrix();
-}
 // **********************************************************************
 //  void display( void )
 // **********************************************************************
@@ -468,9 +420,26 @@ void display( void )
     /*
     */
     ////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//////
-    playerHandler();
-    bulletHandler();
-    enemyHandler();
+    glPushMatrix();
+        glColor3f(0.5,0.5,0.5);
+        glLineWidth(2);
+        glBegin(GL_LINES);
+        glVertex3f(-XMAX,-80,0);
+        glVertex3f(XMAX,-80,0);
+        glEnd();
+    glPopMatrix();
+
+
+
+    glPushMatrix();
+        playerHandler();
+    glPopMatrix();
+    glPushMatrix();
+        bulletHandler();
+    glPopMatrix();
+    glPushMatrix();
+        enemyHandler();
+    glPopMatrix();
 
 	glutSwapBuffers();
 }

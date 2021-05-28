@@ -69,7 +69,7 @@ public:
     Poligono getHitbox(){ return Hitbox; };
 
     void updateHitbox();
-    void moveEnemy(int XMAX, int refreshRate);
+    void moveEnemy(float speed);
     void rotateEntity();
 
 
@@ -123,10 +123,11 @@ void Enemy::drawSprite(RGB Palette[100])
     Sprite.desenhaModelo(posX,posY,Palette);
 
 }
-void Enemy::moveEnemy(int XMAX, int refreshRate)
+void Enemy::moveEnemy(float speed)
 {
 
-    posX = posX - 1*0.45*XMAX/200;
+   // posX = posX - 1*0.45*XMAX/200;
+    posX = posX - speed;
     glTranslatef(posX,0,0);
     direction = 0;
 }

@@ -72,14 +72,15 @@ Bullet::Bullet(float startX, float startY, float force, float angle)
 
 
     angle = angle;
-    speedX = force * cos(angle*PI/180);
-    speedY = force * sin(angle*PI/180);
+    speedX = - force * sin(angle*PI/180);
+    speedY = force * cos(angle*PI/180);
 }
 
 void Bullet::drawShape()
 {
 
     glPushMatrix();
+        glTranslatef(posX,0,0);
         glLineWidth(2);
         glColor3f(1,1,0); // R, G, B  [0..1]
         shape.desenhaPoligono();

@@ -70,6 +70,7 @@
 		<Unit filename="RGB.h" />
 		<Unit filename="Temporizador.cpp" />
 		<Unit filename="Temporizador.h" />
+		<Unit filename="enemy.h" />
 		<Unit filename="player.h" />
 		<Extensions>
 			<code_completion />

@@ -65,7 +65,7 @@ public:
     Poligono getHitbox(){ return Hitbox; };
 
     void updateHitbox();
-    void movePlayer(int XMAX, int refreshRate);
+    void movePlayer(float speed);
     void rotateEntity();
 
 
@@ -113,10 +113,11 @@ void Player::drawSprite(RGB Palette[100])
     Sprite.desenhaModelo(posX,posY,Palette);
 
 }
-void Player::movePlayer(int XMAX, int refreshRate)
+void Player::movePlayer(float speed)
 {
 
-    posX = posX + direction*0.45*XMAX/200;
+   // posX = posX + direction*0.45*XMAX/200;
+    posX = posX + speed * direction;
     glTranslatef(posX,0,0);
     direction = 0;
 }
