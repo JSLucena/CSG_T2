@@ -127,7 +127,7 @@
 	<windows.h>
 	<sys/time.h>
 
-1622231869 source:f:\trabalhos\20211\cg\csg_t2\programabasicoopengl-29-abril-2021.cpp
+1622329549 source:f:\trabalhos\20211\cg\csg_t2\programabasicoopengl-29-abril-2021.cpp
 	<iostream>
 	<cmath>
 	<ctime>
@@ -166,7 +166,7 @@
 	"RGB.h"
 	<vector>
 
-1622232040 f:\trabalhos\20211\cg\csg_t2\bullet.h
+1622329656 f:\trabalhos\20211\cg\csg_t2\bullet.h
 	<iostream>
 	<iomanip>
 	<windows.h>
@@ -176,7 +176,7 @@
 	"Poligono.h"
 	<vector>
 
-1622231277 f:\trabalhos\20211\cg\csg_t2\enemy.h
+1622325616 f:\trabalhos\20211\cg\csg_t2\enemy.h
 	<iostream>
 	<windows.h>
 	<glut.h>

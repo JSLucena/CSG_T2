@@ -17,6 +17,7 @@
 #include <cmath>
 #include <ctime>
 #include <fstream>
+#include <cstdlib>
 #include <vector>
 
 
@@ -67,6 +68,7 @@ float side = 0;
 float pos = 0;
 float speed = 0.0;
 float timeToTravel = 15.0;
+float gravity = 1.0;
 
 bool desenha = false;
 
@@ -85,6 +87,10 @@ bool shoot = false;
 
 
 Enemy testEnemy;
+vector<Enemy> enemies;
+
+
+
 
 ///////////////////////////////////////////////////////////////////
 //###############################################################//
@@ -126,20 +132,28 @@ void printString(string s, int posX, int posY)
 }
 void spawnBullet()
 {
-    Bullet tempBullet = Bullet((player.getPosX() - player.getSprite().width/2 + 1), player.getPosY(),player.getShotPower(),player.getShotAngle());
+    Bullet tempBullet = Bullet((player.getPosX() - player.getSprite().width/2 + 1), player.getPosY(),player.getShotPower(),player.getShotAngle(),YMAX);
     bullets.push_back(tempBullet);
 }
 
 bool BulletOutOfBounds(Bullet b)
 {
-    if(abs(b.getPosX()) > XMAX || abs(b.getPosY()) > YMAX)
+    if(abs(b.getPosX()) > XMAX || abs(b.getPosY()) > YMAX*0.82)
         return true;
     return false;
 }
 
 void respawnEnemy(Enemy &e)
 {
-    e = Enemy(XMAX/2,25,e.getType());
+    int respawnPos =(rand() % 60);
+    e = Enemy(XMAX/2,respawnPos,e.getType());
+}
+Enemy spawnEnemy()
+{
+    int spawnPos = ((rand() % 2) + 1)*25;
+    int type = (rand() % 3) + 1;
+    return Enemy(XMAX/2,spawnPos,type);
+
 }
 void playerHandler()
 {
@@ -184,9 +198,9 @@ void bulletHandler()
     if(bullets.size() > 0 )
         for(auto b = bullets.begin(); b != bullets.end(); b++)
         {
-
             b->drawShape();
-            b->moveBullet();
+            b->moveBullet(dt);
+            b->applyGravity(gravity);
           //  cout << b.getPosX() << "/" << b.getPosY() << endl;
             if(BulletOutOfBounds(*b))
             {
@@ -198,14 +212,18 @@ void bulletHandler()
 }
 void enemyHandler()
 {
-    glPushMatrix();
-        testEnemy.moveEnemy(speed*dt);
-        testEnemy.drawSprite(PaletteGlobal);
-        glColor3f(1,1,1);
-        testEnemy.updateHitbox();
-    glPopMatrix();
-    if(abs(testEnemy.getPosX()) > XMAX/2 )
-            respawnEnemy(testEnemy);
+    for(auto e = enemies.begin(); e != enemies.end(); e++)
+    {
+        glPushMatrix();
+            e->moveEnemy(speed*dt);
+            e->drawSprite(PaletteGlobal);
+            glColor3f(1,1,1);
+            e->updateHitbox();
+        glPopMatrix();
+    if(abs(e->getPosX()) > XMAX/2 )
+            respawnEnemy(*e);
+
+    }
 
 
 }
@@ -280,19 +298,25 @@ void init()
 
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///
     leCores();
+    Min = Ponto (-XMAX, -YMAX);
+    Max = Ponto (XMAX, YMAX);
+
+    speed = XMAX*2/timeToTravel;
+    srand(time(0));
+    enemies.push_back(spawnEnemy());
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///
 
     P1.LePoligono("Triangulo.txt");
     P2.LePoligono("Retangulo.txt");
 
 
-    Min = Ponto (-XMAX, -YMAX);
-    Max = Ponto (XMAX, YMAX);
-
-    testEnemy = Enemy(XMAX/2,50, 1);
 
 
-    speed = XMAX*2/timeToTravel;
+   // testEnemy = Enemy(XMAX/2,50, 1);
+
+
+
+
 
 
     /*
@@ -342,6 +366,10 @@ void animate()
         cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
         TempoTotal = 0;
         nFrames = 0;
+        if(enemies.size() < 10)
+        {
+            enemies.push_back(spawnEnemy());
+        }
     }
 }
 // **********************************************************************
@@ -424,8 +452,8 @@ void display( void )
         glColor3f(0.5,0.5,0.5);
         glLineWidth(2);
         glBegin(GL_LINES);
-        glVertex3f(-XMAX,-80,0);
-        glVertex3f(XMAX,-80,0);
+        glVertex3f(-XMAX,-YMAX*0.8,0);
+        glVertex3f(XMAX,-YMAX*0.8,0);
         glEnd();
     glPopMatrix();
 

@@ -99,8 +99,8 @@ void Enemy::updateHitbox()
     Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY-Sprite.height+1));
     Hitbox.insereVertice(Ponto(posX+1,posY-Sprite.height+1));
     Hitbox.desenhaPoligono();
-    Hitbox.imprime();
-    cout << endl;
+   // Hitbox.imprime();
+  //  cout << endl;
 }
 void Enemy::drawSprite(RGB Palette[100])
 {
