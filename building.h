@@ -73,8 +73,9 @@ void Building::drawSprite(RGB Palette[100])
     float offsetX = 0, offsetY = 0;
     int height = Sprite.height;
     int width = Sprite.width;
+    glTranslatef(posX,0,0);
     Sprite.desenhaModelo(posX,posY,Palette);
-    Hitbox.desenhaPoligono();
+
 }
 
 

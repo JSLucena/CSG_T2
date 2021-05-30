@@ -23,32 +23,7 @@ using namespace std;
 
 #include "Poligono.h"
 #include <vector>
-Ponto Curva1[3];
 
-// **********************************************************************
-Ponto CalculaBezier3(Ponto PC[], double t)
-{
-    Ponto P;
-    double UmMenosT = 1-t;
-
-    P =  PC[0] * UmMenosT * UmMenosT + PC[1] * 2 * UmMenosT * t + PC[2] * t*t;
-    return P;
-}
-// **********************************************************************
-void TracaBezier3Pontos(Ponto curva[3])
-{
-    double t=0.0;
-    double DeltaT = 1.0/10;
-    //cout << "DeltaT: " << DeltaT << endl;
-    glBegin(GL_LINE_STRIP);
-    while(t<1.0)
-    {
-        Ponto P = CalculaBezier3(curva, t);
-        glVertex2f(P.x, P.y);
-        t += DeltaT;
-    }
-    glEnd();
-}
 
 
 
@@ -60,11 +35,11 @@ class Bullet
     float speedX, speedY;
     float startingSpeedX, startingSpeedY;
     float posX, posY;
+    float strtX, strtY;
     bool isAlly;
-    Ponto Bezier[3];
     Ponto Rotation;
 public:
-    Bullet(float startX, float startY, float force, float angle, float ymax);
+    Bullet(float startX, float startY, float force, float angle, float ymax, float bulletspeed);
     float getAngle(){return angle;};
     void setAngle(float a){
         angle = a;
@@ -76,20 +51,22 @@ public:
     bool getIsAlly(){return isAlly;};
     float getPosX(){return posX;};
     float getPosY(){return posY;};
+    Poligono getShape(){return shape;};
     void drawShape();
     void moveBullet(float dt);
     void applyGravity(float gravity);
 
 
 };
-Bullet::Bullet(float startX, float startY, float force, float angle,float ymax)
+Bullet::Bullet(float startX, float startY, float force, float angle,float ymax, float bulletspeed)
 {
    // shape.LePoligono("Triangulo.txt");
 
     shape = Poligono();
     posX = startX;
     posY = startY;
-
+    strtX = startX;
+    strtY = startY;
 
 
     shape.insereVertice(Ponto(posX,posY));
@@ -107,14 +84,11 @@ Bullet::Bullet(float startX, float startY, float force, float angle,float ymax)
 
     this->angle = angle;
 
-    startingSpeedX = - force * sin(this->angle*PI/180);
-    startingSpeedY = force * cos(this->angle*PI/180);
-    speedX = - force * sin(this->angle*PI/180);
-    speedY = force * cos(this->angle*PI/180);
+    startingSpeedX = - force * sin(this->angle*PI/180) * bulletspeed;
+    startingSpeedY = force * cos(this->angle*PI/180) * bulletspeed;
+    speedX = - force * sin(this->angle*PI/180) * bulletspeed;
+    speedY = force * cos(this->angle*PI/180) * bulletspeed;
 
-    Bezier[0] = Ponto(startX,startY);
-    Bezier[1] = Ponto(speedX,speedY);
-    Bezier[2] = Ponto(speedX*1.5,-ymax*0.85);
 }
 
 void Bullet::drawShape()
@@ -155,7 +129,7 @@ void Bullet::moveBullet(float dt)
 void Bullet::applyGravity(float gravity)
 {
     //speedX = speedX - sqrt(pow(startingSpeedX,2)+ 2*gravity + (posX - (posX + speedX)));
-    speedY = sqrt(pow(startingSpeedY,2)+ 2*gravity + (posY - (posY + speedY)));
+   // speedY = sqrt(pow(startingSpeedY,2)+ 2*gravity + (posY - (strtY)));
 
     speedY = speedY - gravity;
    // speedX = speedX - gravity/16;

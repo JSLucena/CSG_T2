@@ -55,10 +55,13 @@ using namespace std;
 #define REFRESHRATE 60
 #define XMAX 100
 #define YMAX 100
-#define buildingcount 8
+#define buildingcount 5
+#define BSPEED 2
+#define MAXENEMIES 10
 ////////////////////////
 Temporizador T;
 double AccumDeltaT=0;
+float BulletTimer;
 
 // Limites lógicos da área de desenho
 Ponto Min, Max;
@@ -69,22 +72,31 @@ double dt;
 float side = 0;
 float pos = 0;
 float speed = 0.0;
+float bulletSpeed = 0.0;
+
 float timeToTravel = 15.0;
-float gravity = 1.0;
+float gravity = 10;
 
 bool desenha = false;
 
 float angulo=0.0;
+int enemySpawnRange = -20;
+int HP = 3;
+bool stopEnemySpawn = false;
+int spawnedEnemies = 0;
+bool shootCD; /// cooldown do tiro do jogador
+int enemyShotChance = 1; ///chance do inimigo atirar a cada ciclo
+
 
 
 void RotacionaAoRedorDeUmPonto(float alfa, Ponto P);
-
+bool HaInterseccao(Ponto k, Ponto l, Ponto m, Ponto n);
 ///////////////////////////////////////////////////////////////////
 RGB PaletteGlobal[100];
 ModeloMatricial teste;
 Player player = Player(-XMAX*0.4,-YMAX* 0.75);
-//Player player = Player(0,0);
 vector<Bullet> bullets;
+vector<Bullet> playerBullet;
 bool shoot = false;
 
 
@@ -123,6 +135,52 @@ void leCores()
     cout << "Cores lidas com sucesso!" << endl;
 
 }
+
+bool testaInterseccao(Poligono p1, Poligono p2)
+{
+    bool alreadyAddedp1,alreadyAddedp2, debug, isInside = false;
+    Ponto auxA1,auxA2, auxB1,auxB2, newPonto;
+    /// teste de interseccao
+    for(int i = 0; i < p1.getNVertices(); i++)
+    {
+        for(int j = 0; j < p2.getNVertices(); j++)
+        {
+            if(j == p2.getNVertices() - 1 )
+            {
+                auxB1 = p2.getVertice(j);
+                auxB2 = p2.getVertice(0);
+            }
+            else
+            {
+                auxB1 = p2.getVertice(j);
+                auxB2 = p2.getVertice(j+1);
+            }
+            if (i == p1.getNVertices() - 1)
+            {
+                auxA1 = p1.getVertice(i);
+                auxA2 = p1.getVertice(0);
+            }
+            else
+            {
+                auxA1 = p1.getVertice(i);
+                auxA2 = p1.getVertice(i+1);
+            }
+
+            debug = HaInterseccao(auxA1,auxA2,auxB1,auxB2);
+
+            if(debug == true)
+            {
+
+                return debug;
+
+
+            }
+
+        }
+    }
+    return false;
+}
+
 //###############################################################//
 
 void printString(string s, int posX, int posY)
@@ -136,18 +194,14 @@ void printString(string s, int posX, int posY)
 Building spawnBuilding(int range)
 {
     int spawnPos = ((rand() % 15) + range);
-    int side = rand() % 2;
     int type = (rand() % 3) + 1;
-
-    if(side == 0)
-        spawnPos *= -1;
 
     return Building(spawnPos,-YMAX*0.69, type);
 
 }
 void spawnBullet()
 {
-    Bullet tempBullet = Bullet((player.getPosX() - player.getSprite().width/2 + 1), player.getPosY(),player.getShotPower(),player.getShotAngle(),YMAX);
+    Bullet tempBullet = Bullet((player.getPosX() - player.getSprite().width/2 + 1), player.getPosY(),player.getShotPower(),player.getShotAngle(),YMAX, bulletSpeed);
     bullets.push_back(tempBullet);
 }
 
@@ -158,16 +212,43 @@ bool BulletOutOfBounds(Bullet b)
     return false;
 }
 
-void respawnEnemy(Enemy &e)
+void respawnEnemy(Enemy &e, int range)
 {
-    int respawnPos =(rand() % 60);
+    int respawnPos =(rand() % 10) + range;
+    int tentativa= 0;
+    for(auto en = enemies.begin(); en != enemies.end(); en++)
+    {
+        if (en->getPosX() < XMAX/2-10 && en->getPosX() > XMAX/2 - 25)
+        {
+
+            respawnPos+=10;
+          //  en = enemies.begin();
+            cout << "changed spawn pos" << endl;
+        }
+
+    }
+    enemySpawnRange= respawnPos;
     e = Enemy(XMAX/2,respawnPos,e.getType());
 }
 Enemy spawnEnemy()
 {
     int spawnPos = ((rand() % 2) + 1)*25;
     int type = (rand() % 3) + 1;
+
+    for(auto en = enemies.begin(); en != enemies.end(); en++)
+    {
+        if (en->getPosX() < XMAX/2-10 && en->getPosX() > XMAX/2 - 25)
+        {
+
+            spawnPos+=10;
+          //  en = enemies.begin();
+            cout << "changed spawn pos" << endl;
+        }
+    }
     return Enemy(XMAX/2,spawnPos,type);
+
+
+
 
 }
 void playerHandler()
@@ -196,11 +277,16 @@ void playerHandler()
 
     if(shoot == true)
     {
-        if(player.getShotPower() > 0 )
+        if(shootCD == false)
         {
-            spawnBullet();
-            bullets.back().setIsAlly(true);
+           if(player.getShotPower() > 0 )
+            {
+                spawnBullet();
+                bullets.back().setIsAlly(true);
+                shootCD = true;
+            }
         }
+
 
     }
 
@@ -223,6 +309,46 @@ void bulletHandler()
                 break;
             }
 
+            if (b->getIsAlly()) ///testando as balas atiradas pelo jogador, que so pegam nos inimigos
+            {
+                for(auto e = enemies.begin(); e != enemies.end(); e++)
+                {
+                    Poligono P1 = b->getShape();
+                    Poligono P2 = e->getHitbox();
+                    if(testaInterseccao(P1,P2))
+                    {
+                         enemies.erase(e);
+                         bullets.erase(b);
+                         break;
+                    }
+
+                }
+                break;
+            }
+            else ///testando as balas atiradas pelos inimigos, que pegam nos predios e no jogador
+            {
+                Poligono P1 = b->getShape();
+                 if(testaInterseccao(P1,player.getHitbox()))
+                    {
+                         HP--;
+                         bullets.erase(b);
+                         break;
+                    }
+                for(auto bld = buildings.begin(); bld != buildings.end(); bld++)
+                {
+                    Poligono P1 = b->getShape();
+                    Poligono P2 = bld->getHitbox();
+                    if(testaInterseccao(P1,P2))
+                    {
+                         buildings.erase(bld);
+                         bullets.erase(b);
+                         break;
+                    }
+                }
+                break;
+
+            }
+
         }
 }
 void enemyHandler()
@@ -235,11 +361,24 @@ void enemyHandler()
             glColor3f(1,1,1);
             e->updateHitbox();
         glPopMatrix();
-    if(abs(e->getPosX()) > XMAX/2 )
-            respawnEnemy(*e);
+        if(abs(e->getPosX()) > XMAX/2 )
+        {
+            respawnEnemy(*e, enemySpawnRange);
+            enemySpawnRange+=20;
+            if (enemySpawnRange > YMAX*0.6)
+                enemySpawnRange= -20;
+        }
+
+        int shotChance = (rand() % 500 ) + 1;
+        if(shotChance <= enemyShotChance)
+        {
+            int randShotPower = (rand() % 5) + 1;
+            int randAngle = rand() % 360;
+            Bullet tempBullet = Bullet((e->getPosX() - e->getSprite().width/2 + 1), e->getPosY() - e->getSprite().height/2-1,randShotPower,randAngle,YMAX, bulletSpeed);
+            bullets.push_back(tempBullet);
+        }
 
     }
-
 
 }
 void buildingHandler()
@@ -330,18 +469,20 @@ void init()
     Max = Ponto (XMAX, YMAX);
 
     speed = XMAX*2/timeToTravel;
+    bulletSpeed = speed*BSPEED;
     srand(time(0));
     enemies.push_back(spawnEnemy());
+    gravity = bulletSpeed/5;
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///
 
     P1.LePoligono("Triangulo.txt");
     P2.LePoligono("Retangulo.txt");
 
-    int range = -XMAX + 10;
+    int range = -XMAX/2 + 10;
     for(int i = 0; i < buildingcount; i++)
     {
         buildings.push_back(spawnBuilding(range));
-        range+=20;
+        range+=16;
     }
 
    // testEnemy = Enemy(XMAX/2,50, 1);
@@ -384,6 +525,8 @@ void animate()
     dt = T.getDeltaT();
     AccumDeltaT += dt;
     TempoTotal += dt;
+    BulletTimer += dt;
+
     nFrames++;
 
     if (AccumDeltaT > 1.0/REFRESHRATE) // fixa a atualização da tela em 60
@@ -398,10 +541,25 @@ void animate()
         cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
         TempoTotal = 0;
         nFrames = 0;
-        if(enemies.size() < 10)
+        if(enemies.size() < MAXENEMIES)
         {
-            enemies.push_back(spawnEnemy());
+            if(!stopEnemySpawn)
+            {
+                enemies.push_back(spawnEnemy());
+                spawnedEnemies++;
+            }
+
         }
+        if(spawnedEnemies >= MAXENEMIES)
+        {
+            stopEnemySpawn= true;
+        }
+    }
+    if(BulletTimer > 1.0)
+    {
+        if(shootCD == true)
+            shootCD = false;
+        BulletTimer = 0;
     }
 }
 // **********************************************************************
@@ -459,6 +617,7 @@ void RotacionaAoRedorDeUmPonto(float alfa, Ponto P)
 void display( void )
 {
     string angleUI;
+    string HPUI;
 	// Limpa a tela com a cor de fundo
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -472,9 +631,15 @@ void display( void )
 
 	////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//////
 	glPushMatrix();
+        HPUI = "HP: ";
+        for(int i = 0; i < HP; i++)
+        {
+            HPUI += "X";
+        }
         angleUI = "Angle: " + to_string(player.getShotAngle());
         printString(angleUI,-XMAX/2-XMAX/2,YMAX*0.75);
         printString("Force: " + to_string(player.getShotPower()),-XMAX/2-XMAX/2,YMAX*0.80 );
+        printString(HPUI,-XMAX/2-XMAX/2,YMAX*0.85);
 
     glPopMatrix();
     /*
@@ -546,6 +711,8 @@ void keyboard ( unsigned char key, int x, int y )
             break;
         case 'w':
             player.setShotPower(player.getShotPower()+1);
+            if(player.getShotPower() > 15)
+                player.setShotPower(15);
             break;
         case 's':
             player.setShotPower(player.getShotPower()-1);;
