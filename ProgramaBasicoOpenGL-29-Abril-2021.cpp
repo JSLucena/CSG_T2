@@ -49,11 +49,13 @@ using namespace std;
 #include "player.h"
 #include "Bullet.h"
 #include "enemy.h"
+#include "building.h"
 
 
 #define REFRESHRATE 60
 #define XMAX 100
 #define YMAX 100
+#define buildingcount 8
 ////////////////////////
 Temporizador T;
 double AccumDeltaT=0;
@@ -88,6 +90,7 @@ bool shoot = false;
 
 Enemy testEnemy;
 vector<Enemy> enemies;
+vector<Building> buildings;
 
 
 
@@ -129,6 +132,18 @@ void printString(string s, int posX, int posY)
     for (int i = 0; i < s.length(); i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, s[i]);
   }
+}
+Building spawnBuilding(int range)
+{
+    int spawnPos = ((rand() % 15) + range);
+    int side = rand() % 2;
+    int type = (rand() % 3) + 1;
+
+    if(side == 0)
+        spawnPos *= -1;
+
+    return Building(spawnPos,-YMAX*0.69, type);
+
 }
 void spawnBullet()
 {
@@ -227,7 +242,20 @@ void enemyHandler()
 
 
 }
+void buildingHandler()
+{
+    for(auto b = buildings.begin(); b != buildings.end(); b++)
+    {
+        glPushMatrix();
+            b->drawSprite(PaletteGlobal);
+        glPopMatrix();
+    }
+}
 //################################################################
+
+
+
+
 // **********************************************************************
 //    Calcula o produto escalar entre os vetores V1 e V2
 // **********************************************************************
@@ -309,8 +337,12 @@ void init()
     P1.LePoligono("Triangulo.txt");
     P2.LePoligono("Retangulo.txt");
 
-
-
+    int range = -XMAX + 10;
+    for(int i = 0; i < buildingcount; i++)
+    {
+        buildings.push_back(spawnBuilding(range));
+        range+=20;
+    }
 
    // testEnemy = Enemy(XMAX/2,50, 1);
 
@@ -458,7 +490,9 @@ void display( void )
     glPopMatrix();
 
 
-
+    glPushMatrix();
+        buildingHandler();
+    glPopMatrix();
     glPushMatrix();
         playerHandler();
     glPopMatrix();

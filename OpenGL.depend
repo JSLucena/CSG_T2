@@ -127,11 +127,12 @@
 	<windows.h>
 	<sys/time.h>
 
-1622329549 source:f:\trabalhos\20211\cg\csg_t2\programabasicoopengl-29-abril-2021.cpp
+1622338341 source:f:\trabalhos\20211\cg\csg_t2\programabasicoopengl-29-abril-2021.cpp
 	<iostream>
 	<cmath>
 	<ctime>
 	<fstream>
+	<cstdlib>
 	<vector>
 	<windows.h>
 	<glut.h>
@@ -145,6 +146,7 @@
 	"player.h"
 	"Bullet.h"
 	"enemy.h"
+	"building.h"
 
 1621808889 f:\trabalhos\20211\cg\csg_t2\rgb.h
 	<iostream>
@@ -166,7 +168,7 @@
 	"RGB.h"
 	<vector>
 
-1622329656 f:\trabalhos\20211\cg\csg_t2\bullet.h
+1622329735 f:\trabalhos\20211\cg\csg_t2\bullet.h
 	<iostream>
 	<iomanip>
 	<windows.h>
@@ -177,6 +179,16 @@
 	<vector>
 
 1622325616 f:\trabalhos\20211\cg\csg_t2\enemy.h
+	<iostream>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Poligono.h"
+	"RGB.h"
+	<vector>
+
+1622337771 f:\trabalhos\20211\cg\csg_t2\building.h
 	<iostream>
 	<windows.h>
 	<glut.h>
