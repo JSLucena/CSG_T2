@@ -60,7 +60,6 @@ public:
 };
 Bullet::Bullet(float startX, float startY, float force, float angle,float ymax, float bulletspeed)
 {
-   // shape.LePoligono("Triangulo.txt");
 
     shape = Poligono();
     posX = startX;
@@ -102,17 +101,13 @@ void Bullet::drawShape()
         glRotatef(angle, 0,0,1);
         glTranslatef(-Rotation.x, -Rotation.y, -Rotation.z);
         shape.desenhaPoligono();
-
-      //  TracaBezier3Pontos(Bezier);
     glPopMatrix();
 
 
 
-   // glRotatef(angle, 0,0,1);
-   // glTranslatef(-posX, -posY, 0);
 
 }
-void Bullet::moveBullet(float dt)
+void Bullet::moveBullet(float dt) ///para movimentarmos a bala recriamos o poligono dela, meio gambiarra mas funciona
 {
     posX = posX + speedX * dt;
     posY = posY + speedY * dt;
@@ -125,14 +120,12 @@ void Bullet::moveBullet(float dt)
     Rotation = Ponto(posX+2,posY+4);
 
 }
-/////ja volto
-void Bullet::applyGravity(float gravity)
+
+void Bullet::applyGravity(float gravity) /// executamos uma desaceleracao simples no eixo Y
 {
-    //speedX = speedX - sqrt(pow(startingSpeedX,2)+ 2*gravity + (posX - (posX + speedX)));
-   // speedY = sqrt(pow(startingSpeedY,2)+ 2*gravity + (posY - (strtY)));
 
     speedY = speedY - gravity;
-   // speedX = speedX - gravity/16;
+
 
 }
 #endif

@@ -26,7 +26,7 @@ class Player
 {
 
     float speed;
-    int direction;
+    int direction; ///direita ou esquerda
     float shotAngle;
     int shotPower;
     ModeloMatricial Sprite;
@@ -81,14 +81,14 @@ Player::Player(float startPosX, float startPosY)
     posY = startPosY;
 
 }
-void Player::updateHitbox()
+void Player::updateHitbox() ///atualizamos a hitbox, recriando ela do zero
 {
     Hitbox = Poligono();
     Hitbox.insereVertice(Ponto(posX+1,posY+1));
     Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY+1));
     Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY-Sprite.height+1));
     Hitbox.insereVertice(Ponto(posX+1,posY-Sprite.height+1));
-    Hitbox.desenhaPoligono();
+  //  Hitbox.desenhaPoligono();
    // Hitbox.imprime();
    // cout << endl;
 }
@@ -97,29 +97,16 @@ void Player::drawSprite(RGB Palette[100])
      float offsetX = 0, offsetY = 0;
      int height = Sprite.height;
      int width = Sprite.width;
-     /*
-        for(int i = 0; i < height;i++)
-        {
-            for(int j = 0; j < width; j++)
-            {
-                glColor3f(Palette[Sprite.M[i][j]].r/255.0, Palette[Sprite.M[i][j]].g/255.0, Palette[Sprite.M[i][j]].b/255.0); // R, G, B  [0..1]
-                glRectf(posX-offsetX,posY+offsetY,posX-offsetX+1,posY+offsetY+1);
-                offsetX+=1;
-            }
-             offsetY-=1;
-             offsetX=0;
-        }
-        */
+
     Sprite.desenhaModelo(posX,posY,Palette);
 
 }
 void Player::movePlayer(float speed)
 {
 
-   // posX = posX + direction*0.45*XMAX/200;
     posX = posX + speed * direction;
     glTranslatef(posX,0,0);
-    direction = 0;
+    direction = 0; ///resetamos a direcao para voltar o controle para o teclado
 }
 void Player::rotateEntity()
 {

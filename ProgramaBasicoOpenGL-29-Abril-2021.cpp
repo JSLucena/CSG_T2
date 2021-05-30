@@ -52,12 +52,13 @@ using namespace std;
 #include "building.h"
 
 
-#define REFRESHRATE 60
-#define XMAX 100
-#define YMAX 100
-#define buildingcount 5
-#define BSPEED 2
-#define MAXENEMIES 10
+#define REFRESHRATE 60 ///taxa de atualziacao do display
+#define XMAX 100 ///sistema de referncias
+#define YMAX 100 ///sistema de referencias
+#define buildingcount 5 ///quantidade de construcoes
+#define BSPEED 1 /// multiplicador de velocidade da bala
+#define MAXENEMIES 10 /// quantidade maxima de inimigos
+#define RANDSHOTCHANCE 500 /// chance de tiro
 ////////////////////////
 Temporizador T;
 double AccumDeltaT=0;
@@ -74,16 +75,16 @@ float pos = 0;
 float speed = 0.0;
 float bulletSpeed = 0.0;
 
-float timeToTravel = 15.0;
+float timeToTravel = 15.0; ///velocidade de viagem pela tela
 float gravity = 10;
 
 bool desenha = false;
 
 float angulo=0.0;
 int enemySpawnRange = -20;
-int HP = 3;
-bool stopEnemySpawn = false;
-int spawnedEnemies = 0;
+int HP = 3; ///vida do jogador
+bool stopEnemySpawn = false; ///quando chegarmos no limite paramos de spawnar
+int spawnedEnemies = 0; ///quantidade total de inimigos spawnados
 bool shootCD; /// cooldown do tiro do jogador
 int enemyShotChance = 1; ///chance do inimigo atirar a cada ciclo
 
@@ -92,20 +93,17 @@ int enemyShotChance = 1; ///chance do inimigo atirar a cada ciclo
 void RotacionaAoRedorDeUmPonto(float alfa, Ponto P);
 bool HaInterseccao(Ponto k, Ponto l, Ponto m, Ponto n);
 ///////////////////////////////////////////////////////////////////
-RGB PaletteGlobal[100];
+RGB PaletteGlobal[100]; ///palette de cores das sprites
 ModeloMatricial teste;
 Player player = Player(-XMAX*0.4,-YMAX* 0.75);
-vector<Bullet> bullets;
-//vector<Bullet> playerBullet;
+vector<Bullet> bullets; ///vector de balas
 
 
 
-bool shoot = false;
+bool shoot = false; ///booleano que representa o tiro do jogador
 
-
-Enemy testEnemy;
-vector<Enemy> enemies;
-vector<Building> buildings;
+vector<Enemy> enemies; ///vector de inimigos
+vector<Building> buildings; ///vector de predios
 
 
 
@@ -130,7 +128,7 @@ void leCores()
 
     for (int i=0; i< qCores; i++)
     {
-        // Le cada elemento da linha
+        /// Le cada elemento da linha
         input >> PaletteGlobal[i+1].r >> PaletteGlobal[i+1].g >> PaletteGlobal[i+1].b;
         if(!input)
             break;
@@ -189,12 +187,12 @@ bool testaInterseccao(Poligono p1, Poligono p2)
 void printString(string s, int posX, int posY)
 {
     glColor3f(1,1,1);
-    glRasterPos2f(posX, posY); //define position on the screen
+    glRasterPos2f(posX, posY); ///define posicao na tela
     for (int i = 0; i < s.length(); i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, s[i]);
   }
 }
-Building spawnBuilding(int range)
+Building spawnBuilding(int range) ///funcao que spawna os predios com base em um range; pseudo aleatorio
 {
     int spawnPos = ((rand() % 15) + range);
     int type = (rand() % 3) + 1;
@@ -215,7 +213,7 @@ bool BulletOutOfBounds(Bullet b)
     return false;
 }
 
-void respawnEnemy(Enemy &e, int range)
+void respawnEnemy(Enemy &e, int range) ///funcao de respawn pseudo aleatoria, ela funciona dando um range de respawn diferente para cada inimigo
 {
     int respawnPos =(rand() % 10) + range;
     int tentativa= 0;
@@ -225,8 +223,7 @@ void respawnEnemy(Enemy &e, int range)
         {
 
             respawnPos+=10;
-          //  en = enemies.begin();
-            cout << "changed spawn pos" << endl;
+          //  cout << "changed spawn pos" << endl;
         }
 
     }
@@ -235,17 +232,16 @@ void respawnEnemy(Enemy &e, int range)
 }
 Enemy spawnEnemy()
 {
-    int spawnPos = ((rand() % 2) + 1)*25;
+    int spawnPos = ((rand() % 2) + 1)*25; ///2 posicoes possiveis para o primeiro spawn
     int type = (rand() % 3) + 1;
 
-    for(auto en = enemies.begin(); en != enemies.end(); en++)
+    for(auto en = enemies.begin(); en != enemies.end(); en++) ///tentativa de nao colidir, nao sei se funciona
     {
         if (en->getPosX() < XMAX/2-10 && en->getPosX() > XMAX/2 - 25)
         {
 
             spawnPos+=10;
-          //  en = enemies.begin();
-            cout << "changed spawn pos" << endl;
+            //cout << "changed spawn pos" << endl;
         }
     }
     return Enemy(XMAX/2,spawnPos,type);
@@ -254,10 +250,9 @@ Enemy spawnEnemy()
 
 
 }
-void playerHandler()
+void playerHandler() ///funcao que cuida da movimentacao, desenho e tiros do jogador
 {
     glPushMatrix();
-        //player.movePlayer(XMAX,REFRESHRATE);
         player.movePlayer(speed * dt);
         player.rotateEntity();
         player.drawSprite(PaletteGlobal);
@@ -265,7 +260,7 @@ void playerHandler()
         player.updateHitbox();
 
 
-        /// Angulo e forca do disparo
+        /// abaixo o desenho da linha que mostra o angulo e forca do disparo
 
         glColor3f(1,0,0);
         glLineWidth(1);
@@ -280,7 +275,7 @@ void playerHandler()
 
     if(shoot == true)
     {
-        if(shootCD == false)
+        if(shootCD == false) ///mesmo apertando espaco o tiro so sai se o tempo de recarga estiver zerado
         {
            if(player.getShotPower() > 0 )
             {
@@ -296,10 +291,10 @@ void playerHandler()
 
     shoot = false;
 }
-void bulletHandler()
+void bulletHandler() /// funcao que cuida dos processos das balas, desde de movimentacao, desenho na tela, ate os testes de colisao
 {
     bool deletedBullet = false;
-    cout << bullets.size() << " ";
+  //  cout << bullets.size() << " ";
     if(bullets.size() > 0 )
         for(auto b = bullets.begin(); b != bullets.end(); b++)
         {
@@ -307,7 +302,7 @@ void bulletHandler()
             b->moveBullet(dt);
             b->applyGravity(gravity);
           //  cout << b.getPosX() << "/" << b.getPosY() << endl;
-            if(BulletOutOfBounds(*b))
+            if(BulletOutOfBounds(*b)) ///caso a bala saia da tela deletamos ela da fila
             {
                 bullets.erase(b);
                 break;
@@ -315,7 +310,7 @@ void bulletHandler()
 
             if (b->getIsAlly()) ///testando as balas atiradas pelo jogador, que so pegam nos inimigos
             {
-                for(auto e = enemies.begin(); e != enemies.end(); e++)
+                for(auto e = enemies.begin(); e != enemies.end(); e++) ///testa a bala contra cada inimigo em relacao a colisao
                 {
                     Poligono P1 = b->getShape();
                     Poligono P2 = e->getHitbox();
@@ -338,13 +333,13 @@ void bulletHandler()
             else ///testando as balas atiradas pelos inimigos, que pegam nos predios e no jogador
             {
                 Poligono P1 = b->getShape();
-                 if(testaInterseccao(P1,player.getHitbox()))
+                 if(testaInterseccao(P1,player.getHitbox())) ///teste de colisao contra o jogador
                     {
                          HP--;
                          bullets.erase(b);
                          break;
                     }
-                for(auto bld = buildings.begin(); bld != buildings.end(); bld++)
+                for(auto bld = buildings.begin(); bld != buildings.end(); bld++) ///teste de colisao contra cada construcao
                 {
                     Poligono P1 = b->getShape();
                     Poligono P2 = bld->getHitbox();
@@ -366,7 +361,7 @@ void bulletHandler()
 
         }
 }
-void enemyHandler()
+void enemyHandler() ///funcao que cuida da movimentacao, desenho e tiros de todos os inimigos
 {
     for(auto e = enemies.begin(); e != enemies.end(); e++)
     {
@@ -376,19 +371,19 @@ void enemyHandler()
             glColor3f(1,1,1);
             e->updateHitbox();
         glPopMatrix();
-        if(abs(e->getPosX()) > XMAX/2 )
+        if(abs(e->getPosX()) > XMAX/2 ) ///caso ele ultrapasse os limites da tela
         {
-            respawnEnemy(*e, enemySpawnRange);
+            respawnEnemy(*e, enemySpawnRange); ///reespawnamos ele de um jeito pseudo aleatorio
             enemySpawnRange+=20;
             if (enemySpawnRange > YMAX*0.6)
                 enemySpawnRange= -20;
         }
 
-        int shotChance = (rand() % 500 ) + 1;
-        if(shotChance <= enemyShotChance)
+        int shotChance = (rand() % RANDSHOTCHANCE ) + 1;
+        if(shotChance <= enemyShotChance) ///chance de cada inimigo atirar
         {
-            int randShotPower = (rand() % 5) + 1;
-            int randAngle = rand() % 360;
+            int randShotPower = (rand() % 5) + 1; ///com forca aleatoria
+            int randAngle = rand() % 360; /// e angulo aleatorio
             Bullet tempBullet = Bullet((e->getPosX() - e->getSprite().width/2 + 1), e->getPosY() - e->getSprite().height/2-1,randShotPower,randAngle,YMAX, bulletSpeed);
             bullets.push_back(tempBullet);
         }
@@ -396,7 +391,7 @@ void enemyHandler()
     }
 
 }
-void buildingHandler()
+void buildingHandler() /// funcao que desenha todas as construcoes
 {
     for(auto b = buildings.begin(); b != buildings.end(); b++)
     {
@@ -500,33 +495,12 @@ void init()
         range+=16;
     }
 
-   // testEnemy = Enemy(XMAX/2,50, 1);
 
 
 
 
 
 
-    /*
-    P1.obtemLimites(MinPoly, MaxPoly);
-
-    Min = MinPoly;
-    Max = MaxPoly;
-
-    Folga = (Max-Min)* 0.1;
-
-    cout << "Folga: "; Folga.imprime();
-
-    Min = Min - Folga;
-    Max = Max + Folga;
-
-    cout << endl;
-    cout << "Min: "; Min.imprime();
-    cout << "Max: "; Max.imprime();
-
-    //Min = ObtemMinimo(Min, MinPoly);
-    //Max = ObtemMaximo(Max, MaxPoly);
-    */
 }
 
 double nFrames=0;
@@ -645,7 +619,7 @@ void display( void )
 
 
 	////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//////
-    if(stopEnemySpawn == true && enemies.size() == 0)
+    if(stopEnemySpawn == true && enemies.size() == 0) /// se tivermos destruido todos os inimigos vencemos
     {
         glPushMatrix();
             printString("YOU WIN",0,0);
@@ -692,7 +666,7 @@ void display( void )
     glPopMatrix();
 
     }
-    else
+    else ///caso o jogador fique sem vida, ou sem predios o jogo acaba
     {
         glPushMatrix();
             printString("GAME OVER",0,0);

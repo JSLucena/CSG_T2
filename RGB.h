@@ -85,7 +85,7 @@ void ModeloMatricial::leModelo(const char *nome)
     cout << "Modelo lido com sucesso!" << endl;
 
 }
-void ModeloMatricial::desenhaModelo(float posX, float posY, RGB Palette[100])
+void ModeloMatricial::desenhaModelo(float posX, float posY, RGB Palette[100]) ///inverti algumas coisas aqui e ficou meio estranho, mas funciona
 {
     float offsetX = 0, offsetY = 0;
     for(int i = 0; i < height;i++)

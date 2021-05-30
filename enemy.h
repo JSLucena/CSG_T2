@@ -98,7 +98,7 @@ void Enemy::updateHitbox()
     Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY+1));
     Hitbox.insereVertice(Ponto(posX-Sprite.width+1,posY-Sprite.height+1));
     Hitbox.insereVertice(Ponto(posX+1,posY-Sprite.height+1));
-    Hitbox.desenhaPoligono();
+ //   Hitbox.desenhaPoligono();
    // Hitbox.imprime();
   //  cout << endl;
 }
@@ -107,26 +107,12 @@ void Enemy::drawSprite(RGB Palette[100])
      float offsetX = 0, offsetY = 0;
      int height = Sprite.height;
      int width = Sprite.width;
-     /*
-        for(int i = 0; i < height;i++)
-        {
-            for(int j = 0; j < width; j++)
-            {
-                glColor3f(Palette[Sprite.M[i][j]].r/255.0, Palette[Sprite.M[i][j]].g/255.0, Palette[Sprite.M[i][j]].b/255.0); // R, G, B  [0..1]
-                glRectf(posX-offsetX,posY+offsetY,posX-offsetX+1,posY+offsetY+1);
-                offsetX+=1;
-            }
-             offsetY-=1;
-             offsetX=0;
-        }
-        */
     Sprite.desenhaModelo(posX,posY,Palette);
 
 }
 void Enemy::moveEnemy(float speed)
 {
 
-   // posX = posX - 1*0.45*XMAX/200;
     posX = posX - speed;
     glTranslatef(posX,0,0);
     direction = 0;
