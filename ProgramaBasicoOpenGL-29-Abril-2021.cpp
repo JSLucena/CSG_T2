@@ -96,7 +96,10 @@ RGB PaletteGlobal[100];
 ModeloMatricial teste;
 Player player = Player(-XMAX*0.4,-YMAX* 0.75);
 vector<Bullet> bullets;
-vector<Bullet> playerBullet;
+//vector<Bullet> playerBullet;
+
+
+
 bool shoot = false;
 
 
@@ -295,6 +298,7 @@ void playerHandler()
 }
 void bulletHandler()
 {
+    bool deletedBullet = false;
     cout << bullets.size() << " ";
     if(bullets.size() > 0 )
         for(auto b = bullets.begin(); b != bullets.end(); b++)
@@ -319,11 +323,17 @@ void bulletHandler()
                     {
                          enemies.erase(e);
                          bullets.erase(b);
+                         deletedBullet = true;
                          break;
                     }
 
                 }
-                break;
+                if(deletedBullet)
+                {
+                    deletedBullet = false;
+                    break;
+                }
+
             }
             else ///testando as balas atiradas pelos inimigos, que pegam nos predios e no jogador
             {
@@ -342,10 +352,15 @@ void bulletHandler()
                     {
                          buildings.erase(bld);
                          bullets.erase(b);
+                         deletedBullet = true;
                          break;
                     }
                 }
-                break;
+                if(deletedBullet)
+                {
+                    deletedBullet = false;
+                    break;
+                }
 
             }
 
@@ -630,7 +645,15 @@ void display( void )
 
 
 	////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//////
-	glPushMatrix();
+    if(stopEnemySpawn == true && enemies.size() == 0)
+    {
+        glPushMatrix();
+            printString("YOU WIN",0,0);
+        glPopMatrix();
+    }
+	if(HP > 0 && buildings.size() > 0)
+    {
+        glPushMatrix();
         HPUI = "HP: ";
         for(int i = 0; i < HP; i++)
         {
@@ -667,6 +690,15 @@ void display( void )
     glPushMatrix();
         enemyHandler();
     glPopMatrix();
+
+    }
+    else
+    {
+        glPushMatrix();
+            printString("GAME OVER",0,0);
+        glPopMatrix();
+    }
+
 
 	glutSwapBuffers();
 }
